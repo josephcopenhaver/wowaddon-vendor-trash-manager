@@ -1,0 +1,23 @@
+# howto: https://authors.curseforge.com/knowledge-base/projects/3451-automatic-packaging
+
+package-as: VendorTrashManager
+enable-nolib-creation: no
+
+externals:
+
+move-folders:
+
+ignore:
+  - .git
+  - tests
+  - README.md
+
+required-dependencies:
+
+optional-dependencies:
+
+# manual-changelog: CHANGELOG.txt
+
+# license-output: LICENSE.txt
+
+tools-used:

@@ -1,0 +1,5 @@
+## Interface: 11302
+## Title: VendorTrashManager
+## Notes: Automatically sells items to a vendor.
+## SavedVariablesPerCharacter: VendorTrashManager_PlayerState
+VendorTrashManager.lua
