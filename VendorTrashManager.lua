@@ -28,16 +28,12 @@ local newClass = function(className)
 
 		__class_name = className,
 
-		new = function(self, obj, options)
+		new = function(self, obj)
 			if not obj then
 				obj = {}
 			end
 		
 			setmetatable(obj, self)
-		
-			if (not options or not options.noinit) and type(obj.init) == "function" then
-				obj:init()
-			end
 		
 			return obj
 		end,
@@ -63,6 +59,8 @@ function VTM:init()
 	self:registerEventHandler("ADDON_LOADED", self.onAddonLoaded)
 
 	frame:SetScript("OnEvent", function(_, ...) self:onEvent(...) end)
+
+	return self
 end
 
 function VTM:registerSlash()
@@ -160,9 +158,8 @@ function VTM:onSlash(msg)
 			self:showSlashUsage()
 			return
 		end
-		if not (self:getItemValue(item) > 0) then
+		if self:getItemValue(item) <= 0 then
 			print("item cannot be sold")
-			self:showSlashUsage()
 			return
 		end
 	end
@@ -181,23 +178,11 @@ function VTM:onSlash(msg)
 		else
 			state.sell[id] = nil
 		end
-    elseif cmd == "debug" then
-        local itemValue = self:getItemValue(item)
-        local isGrey = self:isGrey(item)
-
-        local autoSell = false
-        if itemValue > 0 then
-            if isGrey then
-                autoSell = (state.keep[id] == nil)
-            else
-                autoSell = (state.sell[id] ~= nil)
-            end
-        end
-
-        print("ItemID: "..self:getItemId(item))
-		print("IsGrey: "..tostring(isGrey))
-		print("ItemValue: "..itemValue)
-		print("AutoSell: "..tostring(autoSell))
+	elseif cmd == "debug" then
+		print("ItemID: "..self:getItemId(item))
+		print("IsGrey: "..tostring(self:isGrey(item)))
+		print("ItemValue: "..self:getFormattedTrashValue(self:getItemValue(item)))
+		print("AutoSell: "..tostring(self:isVendorTrashItem(item)))
 	else
 		print("NOT handled: "..msg)
 		self:showSlashUsage()
@@ -207,39 +192,37 @@ function VTM:onSlash(msg)
 	print("handled: "..msg)
 end
 
-function VTM:SellTrash()
-	local totalValue = 0
+function VTM:onMerchantShow()
+	-- sell the trash items and print expected earnings
+
+	local total = 0
 	for bag = 0, 4 do
-		totalValue = totalValue + self:SellTrashInBag(bag)
+		total = total + self:sellTrashInBag(bag)
 	end
 
-	if (totalValue > 0) then
-		print("Sold trash items for : "..self:getFormattedTrashValue(totalValue))
+	if total > 0 then
+		print("Sold trash items for : "..self:getFormattedTrashValue(total))
 	end
 end
-
-VTM.onMerchantShow = VTM.SellTrash
 	
-function VTM:SellTrashInBag(bag)
+function VTM:sellTrashInBag(bag)
 	if GetContainerNumSlots(bag) == 0 then
 		return 0
 	end
 	
 	local bagTrashValue = 0
 	for slot = 1, GetContainerNumSlots(bag) do
-		local itemLink = GetContainerItemLink(bag, slot)
-		if self:isTrashItem(itemLink) then
+		local item = GetContainerItemLink(bag, slot)
+		if self:isVendorTrashItem(item) then
+			bagTrashValue = bagTrashValue + (self:getItemValue(item) * self:getItemStackCount(bag, slot))
 			UseContainerItem(bag, slot)
-			local itemValue = self:getItemValue(itemLink)
-			local count = self:getItemStackCount(bag, slot)
-			bagTrashValue = bagTrashValue + (itemValue * count)
 		end
 	end
 
 	return bagTrashValue
 end
 	
-function VTM:isTrashItem(item)
+function VTM:isVendorTrashItem(item)
 	if not item then
 		return false
 	end
@@ -250,13 +233,17 @@ function VTM:isTrashItem(item)
 		return false
 	end
 
+	if self:getItemValue(item) <= 0 then
+		return false
+	end
+
 	local state = self.state
 
 	if self:isGrey(item) then
 		return (state.keep[id] == nil)
-	else
-		return (state.sell[id] ~= nil)
 	end
+	
+	return (state.sell[id] ~= nil)
 end
 	
 function VTM:getItemValue(item)
@@ -275,4 +262,4 @@ function VTM:getFormattedTrashValue(copper)
 	return format(GOLD_AMOUNT_TEXTURE.." "..SILVER_AMOUNT_TEXTURE.." "..COPPER_AMOUNT_TEXTURE, gold, 0, 0, silver, 0, 0, copper, 0, 0)
 end
 
-VTM:new()
+VTM:new():init()
