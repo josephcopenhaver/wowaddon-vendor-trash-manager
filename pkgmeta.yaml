@@ -3,21 +3,7 @@
 package-as: VendorTrashManager
 enable-nolib-creation: no
 
-externals:
-
-move-folders:
-
 ignore:
   - .git
   - tests
   - README.md
-
-required-dependencies:
-
-optional-dependencies:
-
-# manual-changelog: CHANGELOG.txt
-
-# license-output: LICENSE.txt
-
-tools-used:
