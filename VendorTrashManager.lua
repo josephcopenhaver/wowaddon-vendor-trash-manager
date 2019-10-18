@@ -214,7 +214,7 @@ function VTM:onMerchantShow()
 	end
 
 	if total > 0 then
-		print("Sold trash items for : "..self:formatMoney(total))
+		print("Sold trash items for: "..self:formatMoney(total))
 	end
 end
 	
@@ -272,7 +272,7 @@ end
 function VTM:formatMoney(copper)
 	local gold = math.floor(copper / 10000)
 	local silver = math.floor((copper % 10000) / 100)
-	copper = (copper % 10000) % 100
+	copper = copper % 100
 	
 	return format(FMT_MONEY, gold, 0, 0, silver, 0, 0, copper, 0, 0)
 end
