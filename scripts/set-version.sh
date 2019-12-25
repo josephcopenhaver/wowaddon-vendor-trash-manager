@@ -29,7 +29,7 @@ test -n "${version}" || (
 
 version="v${version}"
 
-sed -i.bak 's/^##\s+Version:\s+([^\n]+)$/## Version: '"${version}"'/' "${toc_file}"
+sed -i.bak -E 's/^##\s+Version:\s+([^\n]+)$/## Version: '"${version}"'/' "${toc_file}"
 rm -f "${toc_file}.bak"
 
 git add "${toc_file}"
