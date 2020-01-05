@@ -34,7 +34,7 @@ local FMT_MONEY = GOLD_AMOUNT_TEXTURE.." "..SILVER_AMOUNT_TEXTURE.." "..COPPER_A
 
 local newClass = function(className)
 	if not className then
-		className ="unknown"
+		className = "unknown"
 	end
 	
 	local class = {
@@ -49,6 +49,17 @@ local newClass = function(className)
 			setmetatable(obj, self)
 		
 			return obj
+		end,
+
+		newClass = function(self, className)
+			if not className then
+				className = "unknown"
+			end
+		
+			local class = self:new()
+			class.__class_name = className
+			class.__index = class
+			return class
 		end,
 	}
 
